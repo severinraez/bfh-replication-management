@@ -7,6 +7,10 @@ public class TimeStamp implements Comparable {
 		return ts[index];
 	}
 	
+	public void setComponent(int index, int value) {
+		ts[index] = value;
+	}
+	
 	@Override
 	public int compareTo(Object other) {
 		if(other instanceof TimeStamp) {
@@ -34,5 +38,17 @@ public class TimeStamp implements Comparable {
 		}
 	}
 	
-	
+	public static TimeStamp max(TimeStamp a, TimeStamp b) {
+		TimeStamp result = new TimeStamp();
+		
+		int iA, iB;
+		for(int i = 0; i < REPLICATION_MANAGERS; i++) {
+			iA = a.getComponent(i);
+			iB = b.getComponent(i);
+			
+			result.setComponent(i, Math.max(iA, iB));
+		}
+		
+		return result;
+	}
 }
