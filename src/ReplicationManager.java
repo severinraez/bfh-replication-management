@@ -1,12 +1,14 @@
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import p2pmpi.mpi.MPI;
 import p2pmpi.mpi.Request;
 
 public class ReplicationManager extends Node {
 	protected static String strType = "RM";
-	protected SortedMap<TimeStamp, Message> mpUpdateLog = new TreeMap<TimeStamp, Message>();
+	protected Set<AtomicProtocolMessage> setWorkLog = new TreeSet<AtomicProtocolMessage>();
 	protected TimeStamp tsValue = new TimeStamp();
 	protected TimeStamp tsReplica = new TimeStamp();
 	protected Threads threads = new Threads();
@@ -54,19 +56,19 @@ public class ReplicationManager extends Node {
 
 	private void checkNetwork() {
 		if(reqGossip.Test() != null) {
-			Gossip g = rcvGossip[0];
-			
+			Gossip g = rcvGossip[0];			
+			setWorkLog.addAll(g.getUpdates());
 			initGossipRequest();
 		}
 		if(reqQuery.Test() != null) {
 			Query q = rcvQuery[0];
-			
+			setWorkLog.add(q);
 			initQueryRequest();
 		}
 
 		if(reqUpdate.Test() != null) {
 			Update u = rcvUpdate[0];
-			
+			setWorkLog.add(u);
 			initUpdateRequest();
 		}
 	}
