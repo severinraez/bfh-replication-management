@@ -1,17 +1,19 @@
 
-public class Update {
+public class Message {
+	protected int iId = 0;
 	protected int iAuthor = 0;
 	protected int iAnswerTo = 0;
 	protected String strTitle = "";
 	
-	public Update(int iAuthor, int iAnswerTo, String strTitle) {
+	public Message(int iId, int iAuthor, int iAnswerTo, String strTitle) {
+		this.iId = iId;
 		this.iAuthor = iAuthor;
 		this.iAnswerTo = iAnswerTo;
 		this.strTitle = strTitle;
 	}
 	
-	public Update(int iAuthor, String strTitle) {
-		this(iAuthor, 0, strTitle);
+	public Message(int iId, int iAuthor, String strTitle) {		
+		this(iId, iAuthor, 0, strTitle);
 	}
 	
 	public String toString() {
@@ -21,4 +23,16 @@ public class Update {
 		str = str + ": \"" + strTitle + "\"";
 		return str;
  	}
+	
+	public boolean isAnswer() {
+		return iAnswerTo != 0;
+	}
+	
+	public int getId() {
+		return iId;
+	}
+	
+	public int getAnswerToId() {
+		return iAnswerTo;
+	}
 }
