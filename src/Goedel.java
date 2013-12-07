@@ -1,3 +1,4 @@
+import p2pmpi.mpi.MPI;
 
 public class Goedel {
 
@@ -18,7 +19,7 @@ public class Goedel {
 	 * 
 	 */
 	
-	int[][] neighbours = {
+	static int[][] neighbours = {
 			{3}, //1
 			{3}, //2
 			{1,2,4,5}, //3
@@ -27,13 +28,28 @@ public class Goedel {
 			{4}, //6
 			{5} //7
 	};
-	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		int rank, size;
+		MPI.Init(args);
+		
+ 		size = MPI.COMM_WORLD.Size();
+		rank = MPI.COMM_WORLD.Rank();
+				
+		if(rank < 6) {
+			System.out.println(rank + " is a RM");
+			ReplicationManager rm = new ReplicationManager(rank, neighbours[rank]);
+			rm.work();
+		}
+		else {
+			System.out.println(rank + " is a FE");
+			FrontEnd fe = new FrontEnd(rank, neighbours[rank]);
+			fe.work();
+		}
 
+		MPI.Finalize();
 	}
 
 }
