@@ -4,9 +4,9 @@ public class ReplicationManager extends Node {
 
 	public ReplicationManager(int rank, int[] is) {
 		super(rank);
+		log("initialized");
 	}
 
 	public void work() {	
 	}
-
 }

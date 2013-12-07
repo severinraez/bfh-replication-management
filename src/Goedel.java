@@ -38,16 +38,12 @@ public class Goedel {
  		size = MPI.COMM_WORLD.Size();
 		rank = MPI.COMM_WORLD.Rank();
 				
-		if(rank < 6) {
-			System.out.println(rank + " is a RM");
-			ReplicationManager rm = new ReplicationManager(rank, neighbours[rank]);
-			rm.work();
-		}
-		else {
-			System.out.println(rank + " is a FE");
-			FrontEnd fe = new FrontEnd(rank, neighbours[rank]);
-			fe.work();
-		}
+		Node n = null;
+		if(rank < 6)
+			n = new ReplicationManager(rank, neighbours[rank]);
+		else
+			n = new FrontEnd(rank, neighbours[rank]);			
+		n.work();
 
 		MPI.Finalize();
 	}

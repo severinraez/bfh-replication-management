@@ -4,11 +4,10 @@ public class FrontEnd extends Node {
 
 	public FrontEnd(int rank, int[] is) {
 		super(rank);
+		log("initialized");
 	}
 
 	public void work() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -10,4 +10,6 @@ public abstract class Node {
 	protected void log(String msg) {
 		System.out.println(strType + " " + rank + ": " + msg);
 	}
+	
+	public abstract void work();
 }
