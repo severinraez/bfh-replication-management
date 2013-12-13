@@ -1,5 +1,7 @@
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import p2pmpi.mpi.MPI;
 import p2pmpi.mpi.Request;
@@ -19,9 +21,11 @@ public class ReplicationManager extends Node {
 	protected Query rcvQuery[] = new Query[1];
 	protected Update rcvUpdate[] = new Update[1];
 	
+	protected int iNeighbourRanks[];
 
-	public ReplicationManager(int rank, int[] is) {
+	public ReplicationManager(int rank, int[] neighbourRanks) {
 		super(rank);
+		iNeighbourRanks = neighbourRanks;
 		log("initialized");
 	}
 
@@ -31,6 +35,7 @@ public class ReplicationManager extends Node {
 			checkNetwork();
 			processUpdates();
 			answerQueries();
+			gossip();
 		}
 	}
 	
@@ -114,5 +119,25 @@ public class ReplicationManager extends Node {
 			}
 		}
 		setWorkLog.removeAll(done);
+	}
+	
+	private void gossip() {
+		List<Update> updates = new Vector<Update>();
+		TimeStamp t = new TimeStamp(tsGossipped);
+		for(AtomicProtocolMessage msg : setWorkLog) {
+			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsGossipped) < 0) { //ungossipped update
+				t = TimeStamp.max(t, msg.getTimeStamp());
+				updates.add((Update)msg);
+			}
+		}
+		Gossip gossipMessage = new Gossip(updates);
+		
+		for(int rank : iNeighbourRanks) {
+			Gossip sndBuf[] = new Gossip[1];
+			MPI.COMM_WORLD.Isend(sndBuf, 0, 1, MPI.OBJECT, rank, ProtocolMessage.GOSSIP);
+		}
+		
+		//the updates are done and gossipped, so remove them
+		setWorkLog.removeAll(updates);
 	}
 }

@@ -2,6 +2,18 @@ public class TimeStamp implements Comparable<TimeStamp> {
 	protected final static int REPLICATION_MANAGERS = 7;
 
 	protected int ts[] = new int[REPLICATION_MANAGERS];
+	
+	public TimeStamp() {
+		for(int i = 0; i < REPLICATION_MANAGERS; i++) {
+			ts[i] = 0;
+		}
+	}
+	
+	public TimeStamp(TimeStamp src) {
+		for(int i = 0; i < REPLICATION_MANAGERS; i++) {
+			ts[i] = src.getComponent(i);
+		}
+	}
 
 	public int getComponent(int index) {
 		return ts[index];
