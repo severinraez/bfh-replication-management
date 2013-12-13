@@ -67,8 +67,7 @@ public class ReplicationManager extends Node {
 		}
 		s = reqQuery.Test();
 		if(s != null) {
-			Query q = rcvQuery[0];
-			
+			Query q = rcvQuery[0];			
 			setWorkLog.add(q);
 			initQueryRequest();
 		}
@@ -92,6 +91,7 @@ public class ReplicationManager extends Node {
 					e.printStackTrace();
 				}						
 				
+				//adjust our value timestamp to reflect added updates
 				TimeStamp t = TimeStamp.max(tsValue, u.getTimeStamp());
 				t.setComponent(rank, t.getComponent(rank) + 1);
 				
@@ -109,7 +109,8 @@ public class ReplicationManager extends Node {
 				QueryResponse r = new QueryResponse(tsValue);
 				Thread result = threads.findMessage(q.getMessage());
 				
-				r.setMessageAndAnswers(result.getMessage(), result.getAnswers());
+				if(result != null)				
+					r.setMessageAndAnswers(result.getMessage(), result.getAnswers());
 				
 				QueryResponse sndBuf[] = new QueryResponse[1];
 				sndBuf[0] = r;
@@ -118,18 +119,24 @@ public class ReplicationManager extends Node {
 				done.add(q);
 			}
 		}
+		
+		//remove the answered queries from the worklog
 		setWorkLog.removeAll(done);
 	}
 	
 	private void gossip() {
 		List<Update> updates = new Vector<Update>();
 		TimeStamp t = new TimeStamp(tsGossipped);
+		
+		//find all ungossipped updates...
 		for(AtomicProtocolMessage msg : setWorkLog) {
 			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsGossipped) < 0) { //ungossipped update
 				t = TimeStamp.max(t, msg.getTimeStamp());
 				updates.add((Update)msg);
 			}
 		}
+		
+		//...and prepare a gossip message including them
 		Gossip gossipMessage = new Gossip(updates);
 		
 		for(int rank : iNeighbourRanks) {
