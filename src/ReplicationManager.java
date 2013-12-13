@@ -134,6 +134,7 @@ public class ReplicationManager extends Node {
 		
 		for(int rank : iNeighbourRanks) {
 			Gossip sndBuf[] = new Gossip[1];
+			sndBuf[0] = gossipMessage;
 			MPI.COMM_WORLD.Isend(sndBuf, 0, 1, MPI.OBJECT, rank, ProtocolMessage.GOSSIP);
 		}
 		
