@@ -1,11 +1,11 @@
-import java.util.List;
-import java.util.Vector;
+import java.util.Set;
+import java.util.TreeSet;
 
 import p2pmpi.mpi.MPI;
 
 public class FrontEnd extends Node {
 	protected static String strType = "FE";
-	protected List<Integer> iKnownMessages = new Vector<Integer>();
+	protected Set<Integer> iKnownMessages = new TreeSet<Integer>();
 	protected int[] neighbourIds;
 	
 	protected TimeStamp ts;
@@ -50,7 +50,11 @@ public class FrontEnd extends Node {
 		MPI.COMM_WORLD.Recv(queryRcvBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY_RESPONSE);		
 		QueryResponse r = queryRcvBuf[0];
 		
-		//TODO: add ids of known messages, display
+		//TODO: display
+		iKnownMessages.add(r.getMessage().getId());
+		for(Message msg : r.getAnswers()) {
+			iKnownMessages.add(msg.getId());			
+		}
 	}
 	
 	protected void sendMessage() {
@@ -60,6 +64,8 @@ public class FrontEnd extends Node {
 		Message m = new Message(++iIdCounter, rank, randomMessage(), "Hello from FE " + rank);
 		Update u = new Update(ts, m);
 		
+		//TODO: display
+		
 		Update sndBuf[] = new Update[1];
 		sndBuf[0] = u;		
 		
@@ -68,8 +74,13 @@ public class FrontEnd extends Node {
 	}
 	
 	protected int randomMessage() {
-		int index = (int)(Math.round(Math.random() * iKnownMessages.size()));;		
-		return iKnownMessages.get(index);
+		int index = (int)(Math.round(Math.random() * iKnownMessages.size()));;
+		int curIndex = 0;
+		for(int messageId : iKnownMessages) {
+			if(curIndex++ == index)
+				return messageId;
+		}
+		return 0;
 	}
 	
 	protected int randomNeighbour() {

@@ -13,6 +13,10 @@ public class QueryResponse extends AtomicProtocolMessage {
 		return msg;
 	}
 	
+	public List<Message> getAnswers() {
+		return answers;
+	}
+	
 	public void setMessageAndAnswers(Message msg, List<Message> answers) {
 		this.msg = msg;
 		this.answers = answers;
