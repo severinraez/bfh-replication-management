@@ -1,16 +1,15 @@
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import p2pmpi.mpi.MPI;
 import p2pmpi.mpi.Request;
+import p2pmpi.mpi.Status;
 
 public class ReplicationManager extends Node {
 	protected static String strType = "RM";
 	protected Set<AtomicProtocolMessage> setWorkLog = new TreeSet<AtomicProtocolMessage>();
 	protected TimeStamp tsValue = new TimeStamp();
-	protected TimeStamp tsReplica = new TimeStamp();
+	protected TimeStamp tsGossipped = new TimeStamp();
 	protected Threads threads = new Threads();
 	
 	protected Request reqGossip, reqQuery, reqUpdate;
@@ -53,20 +52,23 @@ public class ReplicationManager extends Node {
 		reqUpdate = MPI.COMM_WORLD.Irecv(rcvUpdate, 0, 1, MPI.OBJECT, MPI.ANY_SOURCE, ProtocolMessage.UPDATE);
 	}
 
-
 	private void checkNetwork() {
-		if(reqGossip.Test() != null) {
+		Status s;
+		s = reqGossip.Test(); 
+		if(s != null) {
 			Gossip g = rcvGossip[0];			
 			setWorkLog.addAll(g.getUpdates());
 			initGossipRequest();
 		}
-		if(reqQuery.Test() != null) {
+		s = reqQuery.Test();
+		if(s != null) {
 			Query q = rcvQuery[0];
+			
 			setWorkLog.add(q);
 			initQueryRequest();
 		}
-
-		if(reqUpdate.Test() != null) {
+		s = reqUpdate.Test();
+		if(s != null) {
 			Update u = rcvUpdate[0];
 			setWorkLog.add(u);
 			initUpdateRequest();
@@ -74,8 +76,37 @@ public class ReplicationManager extends Node {
 	}
 
 	private void processUpdates() {
+		for(AtomicProtocolMessage msg : setWorkLog) {
+			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) > 0) { //newer update
+				Update u = (Update)msg;				
+				
+				try {
+					threads.addMessage(u.getMessage());
+				} catch (Exception e) {
+					log("Could not add message " + u.getMessage().getId());
+					e.printStackTrace();
+				}						
+				
+				TimeStamp t = TimeStamp.max(tsValue, u.getTimeStamp());
+				t.setComponent(rank, t.getComponent(rank) + 1);
+				
+				tsValue = t;
+			}
+		}
 	}
 
 	private void answerQueries() {
+		Set<Query> done = new TreeSet<Query>();
+		for(AtomicProtocolMessage msg : setWorkLog) {
+			if(msg instanceof Query && msg.getTimeStamp().compareTo(tsValue) < 0) { //solvable query
+				Query q = (Query)msg;
+				
+				QueryResponse r = new QueryResponse(tsValue);
+				//TODO: send response
+				
+				done.add(q);
+			}
+		}
+		setWorkLog.removeAll(done);
 	}
 }

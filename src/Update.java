@@ -6,4 +6,8 @@ public class Update extends AtomicProtocolMessage {
 		super(ts);
 		msgData = data;
 	}
+	
+	public Message getMessage() {
+		return msgData;
+	}
 }
