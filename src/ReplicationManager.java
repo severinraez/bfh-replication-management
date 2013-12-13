@@ -102,7 +102,13 @@ public class ReplicationManager extends Node {
 				Query q = (Query)msg;
 				
 				QueryResponse r = new QueryResponse(tsValue);
-				//TODO: send response
+				Thread result = threads.findMessage(q.getMessage());
+				
+				r.setMessageAndAnswers(result.getMessage(), result.getAnswers());
+				
+				QueryResponse sndBuf[] = new QueryResponse[1];
+				sndBuf[0] = r;
+				MPI.COMM_WORLD.Isend(sndBuf, 0, 1, MPI.OBJECT, q.getSender(), ProtocolMessage.QUERY_RESPONSE);
 				
 				done.add(q);
 			}

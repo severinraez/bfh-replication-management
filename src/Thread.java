@@ -28,4 +28,16 @@ public class Thread {
 		}
 		return null; //not found
 	}
+	
+	public Message getMessage() {
+		return msg;
+	}
+	
+	public List<Message> getAnswers() {
+		List<Message> result = new Vector<Message>();
+		for(Thread t : children) {
+			result.add(t.getMessage());			
+		}
+		return result;
+	}
 }
