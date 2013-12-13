@@ -36,6 +36,11 @@ public class ReplicationManager extends Node {
 			processUpdates();
 			answerQueries();
 			gossip();
+			
+			try {
+				java.lang.Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 	

@@ -1,10 +1,12 @@
 import java.util.List;
+import java.util.Vector;
 
 import p2pmpi.mpi.MPI;
 
 public class FrontEnd extends Node {
 	protected static String strType = "FE";
-	protected List<Integer> iKnownMessages;
+	protected List<Integer> iKnownMessages = new Vector<Integer>();
+	protected int[] neighbourIds;
 	
 	protected TimeStamp ts;
 	
@@ -12,20 +14,28 @@ public class FrontEnd extends Node {
 	protected boolean bWaitingForResponse = false; 
 	protected int iIdCounter = 0;
 
-	public FrontEnd(int rank, int[] is) {
+	public FrontEnd(int rank, int[] neighbourIds) {
 		super(rank);
 		log("initialized");
+		iKnownMessages.add(0);
+		this.neighbourIds = neighbourIds;
 	}
 
 	public void work() {
 		while(true) {
 			query();
-			sendMessage();			
+			sendMessage();
+			
+			try {
+				java.lang.Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 	
 	protected void query() {
-		//TODO: randomize
+		if(Math.random() > 0.25)
+			return;
 			
 		Query sndBuf[] = new Query[1];
 			
@@ -44,7 +54,9 @@ public class FrontEnd extends Node {
 	}
 	
 	protected void sendMessage() {
-		//TODO: randomize
+		if(Math.random() > 0.25)
+			return;
+		
 		Message m = new Message(++iIdCounter, rank, randomMessage(), "Hello from FE " + rank);
 		Update u = new Update(ts, m);
 		
@@ -56,10 +68,12 @@ public class FrontEnd extends Node {
 	}
 	
 	protected int randomMessage() {
-		return 0;
+		int index = (int)(Math.round(Math.random() * iKnownMessages.size()));;		
+		return iKnownMessages.get(index);
 	}
 	
 	protected int randomNeighbour() {
-		return 0;
+		int index = (int)(Math.round(Math.random() * neighbourIds.length-1));
+		return neighbourIds[index];
 	}
 }
