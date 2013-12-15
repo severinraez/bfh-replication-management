@@ -50,11 +50,11 @@ public class FrontEnd extends Node {
 		MPI.COMM_WORLD.Recv(queryRcvBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY_RESPONSE);		
 		QueryResponse r = queryRcvBuf[0];
 		
-		//TODO: display
 		iKnownMessages.add(r.getMessage().getId());
 		for(Message msg : r.getAnswers()) {
 			iKnownMessages.add(msg.getId());			
 		}
+		logResponse(r);
 	}
 	
 	protected void sendMessage() {
@@ -64,7 +64,7 @@ public class FrontEnd extends Node {
 		Message m = new Message(++iIdCounter, rank, randomMessage(), "Hello from FE " + rank);
 		Update u = new Update(ts, m);
 		
-		//TODO: display
+		logUpdate(u);
 		
 		Update sndBuf[] = new Update[1];
 		sndBuf[0] = u;		
@@ -86,5 +86,18 @@ public class FrontEnd extends Node {
 	protected int randomNeighbour() {
 		int index = (int)(Math.round(Math.random() * neighbourIds.length-1));
 		return neighbourIds[index];
+	}
+	
+	protected void logUpdate(Update u) {
+		String str = "";
+		str += "Sending update with ts " + u.getTimeStamp() + " and message " + u.getMessage().getId();
+		System.out.println(str);
+	}
+	
+	protected void logResponse(QueryResponse r) {
+		String str = "";
+		str += "Received QueryResponse with ts " + r.getTimeStamp() + " and " + r.getAnswers().size() + " answers";
+		System.out.println(str);
+
 	}
 }

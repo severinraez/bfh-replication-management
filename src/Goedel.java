@@ -32,20 +32,27 @@ public class Goedel {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		System.out.println("start");
 		int rank, size;
 		MPI.Init(args);
 		
  		size = MPI.COMM_WORLD.Size();
 		rank = MPI.COMM_WORLD.Rank();
-				
-		Node n = null;
-		if(rank < 6)
-			n = new ReplicationManager(rank, neighbours[rank]);
-		else
-			n = new FrontEnd(rank, neighbours[rank]);			
-		n.work();
+		
+		if(size == neighbours.length) {
+			System.out.println("init");
+			Node n = null;
+			if(rank < 6)
+				n = new ReplicationManager(rank, neighbours[rank]);
+			else
+				n = new FrontEnd(rank, neighbours[rank]);			
+			n.work();
 
-		MPI.Finalize();
+			MPI.Finalize();			
+		}
+		else {
+			System.out.println("Size and rank differ (" + size + " and " + rank + "), aborting");
+		}				
 	}
 
 }

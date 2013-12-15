@@ -56,4 +56,14 @@ public class TimeStamp implements Comparable<TimeStamp> {
 
 		return result;
 	}
+	
+	public String toString() {
+		String str = "";
+		for(int i = 0; i < REPLICATION_MANAGERS; i++) {
+			if(i > 0)
+				str += ", ";
+			str += ts[i];
+		}
+		return str;
+	}
 }
