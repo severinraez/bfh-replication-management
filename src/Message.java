@@ -1,5 +1,7 @@
+import java.io.Serializable;
 
-public class Message {
+public class Message implements Serializable {
+	private static final long serialVersionUID = 8767794265934522414L;
 	protected int iId = 0;
 	protected int iAuthor = 0;
 	protected int iAnswerTo = 0;

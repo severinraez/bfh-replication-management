@@ -19,15 +19,17 @@ public class Goedel {
 	 * 
 	 */
 	
-	static int[][] neighbours = {
-			{3}, //1
-			{3}, //2
-			{1,2,4,5}, //3
-			{3,6}, //4
-			{3,7}, //5
-			{4}, //6
-			{5} //7
+	//[node][0/fe|1/rm][i] = rank
+	static int[][][] neighbours = {
+			//{{}, {3}}, //1
+			//{{}, 3}, //2
+		    {{}, {4,5}}, //{{}, {1,2,4,5}}, //3
+			{{6}, {3}},//4
+			{{7}, {3}}, //5
+			{{}, {4}}, //6
+			{{}, {5}} //7
 	};
+	static int frontendsFrom = 3;
 	/**
 	 * @param args
 	 */
@@ -42,10 +44,10 @@ public class Goedel {
 		if(size == neighbours.length) {
 			System.out.println("init");
 			Node n = null;
-			if(rank < 6)
-				n = new ReplicationManager(rank, neighbours[rank]);
+			if(rank < frontendsFrom)
+				n = new ReplicationManager(rank, neighbours[rank][0], neighbours[rank][1]);
 			else
-				n = new FrontEnd(rank, neighbours[rank]);			
+				n = new FrontEnd(rank, neighbours[rank][0], neighbours[rank][1]);			
 			n.work();
 
 			MPI.Finalize();			

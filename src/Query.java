@@ -1,5 +1,6 @@
 
 public class Query extends AtomicProtocolMessage {
+	private static final long serialVersionUID = -7956088787462804951L;
 	protected int iSender;
 	protected int iMessage;
 

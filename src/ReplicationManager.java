@@ -20,12 +20,9 @@ public class ReplicationManager extends Node {
 	protected Gossip rcvGossip[] = new Gossip[1];
 	protected Query rcvQuery[] = new Query[1];
 	protected Update rcvUpdate[] = new Update[1];
-	
-	protected int iNeighbourRanks[];
 
-	public ReplicationManager(int rank, int[] neighbourRanks) {
-		super(rank);
-		iNeighbourRanks = neighbourRanks;
+	public ReplicationManager(int rank, int frontEndIds[] , int replicationManagerIds[]) {
+		super(rank, "RM", frontEndIds, replicationManagerIds);
 		log("initialized");
 	}
 
@@ -144,7 +141,7 @@ public class ReplicationManager extends Node {
 		//...and prepare a gossip message including them
 		Gossip gossipMessage = new Gossip(updates);
 		
-		for(int rank : iNeighbourRanks) {
+		for(int rank : replicationManagerIds) {
 			Gossip sndBuf[] = new Gossip[1];
 			sndBuf[0] = gossipMessage;
 			MPI.COMM_WORLD.Isend(sndBuf, 0, 1, MPI.OBJECT, rank, ProtocolMessage.GOSSIP);

@@ -2,6 +2,7 @@ import java.util.List;
 
 
 public class QueryResponse extends AtomicProtocolMessage {
+	private static final long serialVersionUID = -6188515720547675082L;
 	protected Message msg;
 	protected List<Message> answers;
 

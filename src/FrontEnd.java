@@ -3,10 +3,8 @@ import java.util.TreeSet;
 
 import p2pmpi.mpi.MPI;
 
-public class FrontEnd extends Node {
-	protected static String strType = "FE";
+public class FrontEnd extends Node {	
 	protected Set<Integer> iKnownMessages = new TreeSet<Integer>();
-	protected int[] neighbourIds;
 	
 	protected TimeStamp ts;
 	
@@ -14,11 +12,10 @@ public class FrontEnd extends Node {
 	protected boolean bWaitingForResponse = false; 
 	protected int iIdCounter = 0;
 
-	public FrontEnd(int rank, int[] neighbourIds) {
-		super(rank);
+	public FrontEnd(int rank, int[] frontEndIds, int[] replicationManagerIds) {
+		super(rank, "FE", frontEndIds, replicationManagerIds);
 		log("initialized");
 		iKnownMessages.add(0);
-		this.neighbourIds = neighbourIds;
 	}
 
 	public void work() {
@@ -84,8 +81,8 @@ public class FrontEnd extends Node {
 	}
 	
 	protected int randomNeighbour() {
-		int index = (int)(Math.round(Math.random() * neighbourIds.length-1));
-		return neighbourIds[index];
+		int index = (int)(Math.round(Math.random() * frontEndIds.length-1));
+		return frontEndIds[index];
 	}
 	
 	protected void logUpdate(Update u) {
