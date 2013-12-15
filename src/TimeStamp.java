@@ -1,5 +1,9 @@
-public class TimeStamp implements Comparable<TimeStamp> {
-	protected final static int REPLICATION_MANAGERS = 7;
+import java.io.Serializable;
+
+public class TimeStamp implements Comparable<TimeStamp>, Serializable{
+	private static final long serialVersionUID = -5949541257756329701L;
+
+	protected final static int REPLICATION_MANAGERS = 5;
 
 	protected int ts[] = new int[REPLICATION_MANAGERS];
 	

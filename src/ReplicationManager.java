@@ -87,7 +87,7 @@ public class ReplicationManager extends Node {
 		for(AtomicProtocolMessage msg : setWorkLog) {
 			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) > 0) { //newer update				
 				Update u = (Update)msg;				
-				log ("processing update " + u);
+				log ("processing " + u);
 				
 				try {
 					threads.addMessage(u.getMessage());
@@ -110,6 +110,8 @@ public class ReplicationManager extends Node {
 		for(AtomicProtocolMessage msg : setWorkLog) {
 			if(msg instanceof Query && msg.getTimeStamp().compareTo(tsValue) < 0) { //solvable query
 				Query q = (Query)msg;
+				
+				log("answering " + q);
 				
 				QueryResponse r = new QueryResponse(tsValue);
 				Thread result = threads.findMessage(q.getMessage());
@@ -152,5 +154,9 @@ public class ReplicationManager extends Node {
 		
 		//the updates are done and gossipped, so remove them
 		setWorkLog.removeAll(updates);
+	}
+	
+	protected void log(String msg) {
+		super.log(msg + " (my tsValue: " + tsValue + " my tsGossipped: " + tsGossipped + ")");
 	}
 }

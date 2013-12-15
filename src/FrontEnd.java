@@ -6,7 +6,7 @@ import p2pmpi.mpi.MPI;
 public class FrontEnd extends Node {	
 	protected Set<Integer> iKnownMessages = new TreeSet<Integer>();
 	
-	protected TimeStamp ts;
+	protected TimeStamp ts = new TimeStamp();
 	
 	protected QueryResponse queryRcvBuf[] = new QueryResponse[1];
 	protected boolean bWaitingForResponse = false; 
@@ -46,12 +46,12 @@ public class FrontEnd extends Node {
 		MPI.COMM_WORLD.Send(sndBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY);
 		MPI.COMM_WORLD.Recv(queryRcvBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY_RESPONSE);		
 		QueryResponse r = queryRcvBuf[0];
+		log("NETWORK: Received " + r + " for query " + q);
 		
 		iKnownMessages.add(r.getMessage().getId());
 		for(Message msg : r.getAnswers()) {
 			iKnownMessages.add(msg.getId());			
 		}
-		log("NETWORK: Received" + r);
 	}
 	
 	protected void sendMessage() {
@@ -83,4 +83,9 @@ public class FrontEnd extends Node {
 		int index = (int)(Math.round(Math.random() * (replicationManagerIds.length-1)));
 		return replicationManagerIds[index];
 	}
+	
+	protected void log(String msg) {
+		super.log(msg + " (my ts: " + ts + ")");
+	}
+
 }
