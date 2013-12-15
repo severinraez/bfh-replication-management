@@ -6,16 +6,18 @@ public class Message implements Serializable {
 	protected int iAuthor = 0;
 	protected int iAnswerTo = 0;
 	protected String strTitle = "";
+	protected TimeStamp tsPrev;
 	
-	public Message(int iId, int iAuthor, int iAnswerTo, String strTitle) {
+	public Message(int iId, int iAuthor, int iAnswerTo, String strTitle, TimeStamp tsPrev) {
 		this.iId = iId;
 		this.iAuthor = iAuthor;
 		this.iAnswerTo = iAnswerTo;
 		this.strTitle = strTitle;
+		this.tsPrev = tsPrev;
 	}
 	
-	public Message(int iId, int iAuthor, String strTitle) {		
-		this(iId, iAuthor, 0, strTitle);
+	public Message(int iId, int iAuthor, String strTitle, TimeStamp tsPrev) {		
+		this(iId, iAuthor, 0, strTitle, tsPrev);
 	}
 	
 	public String toString() {
@@ -36,5 +38,9 @@ public class Message implements Serializable {
 	
 	public int getAnswerToId() {
 		return iAnswerTo;
+	}
+	
+	public TimeStamp getTimeStamp() {
+		return tsPrev;
 	}
 }

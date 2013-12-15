@@ -40,4 +40,20 @@ public class Thread {
 		}
 		return result;
 	}
+	
+	public String toString() {
+		return _toString(0);
+	}
+	
+	protected String _toString(int level) {
+		String str = "";	
+		for(int i = 0; i < level; i++) {
+			str += " ";
+		}
+		str += msg + "\n";
+	    for(Thread t : children) {
+	    	t._toString(level + 4);
+	    }
+	    return str;
+	}
 }

@@ -28,4 +28,12 @@ public class Threads {
 		}
 		return null;
 	}
+	
+	public String toString() {
+		String str = "";
+		for(Thread t : rootThreads) {
+			str += t;
+		}
+		return str;
+	}
 }

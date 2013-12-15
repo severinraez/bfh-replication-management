@@ -67,7 +67,7 @@ public class FrontEnd extends Node {
 			return;
 
 		Message m = new Message(++iIdCounter, rank, randomMessage(),
-				"Hello from FE " + rank);
+				"Hello #" + iIdCounter + " from FE " + rank, ts);
 		Update u = new Update(ts, m);
 
 		Update sndBuf[] = new Update[1];

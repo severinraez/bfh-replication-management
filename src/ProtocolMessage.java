@@ -6,4 +6,5 @@ public class ProtocolMessage implements Serializable {
 	public static final int QUERY = 2;
 	public static final int UPDATE = 3;
 	public static final int QUERY_RESPONSE = 4;
+	public static final int UPDATE_RESPONSE = 5;
 }
