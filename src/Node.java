@@ -20,10 +20,14 @@ public abstract class Node {
 			msg += id + ", ";
 		}
 		msg += ", go.";
-		log(msg);
+		_log(msg);
 	}
 
 	protected void log(String msg) {
+		_log(msg);
+	}
+	
+	private void _log(String msg) {
 		System.out.println(strType + " " + rank + ": " + msg);
 	}
 	

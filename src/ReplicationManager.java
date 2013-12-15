@@ -10,8 +10,9 @@ import p2pmpi.mpi.Status;
 public class ReplicationManager extends Node {
 	protected static String strType = "RM";
 	protected Set<AtomicProtocolMessage> setWorkLog = new TreeSet<AtomicProtocolMessage>();
+	protected Set<TimeStamp> knownMessages = new TreeSet<TimeStamp>();
 	protected TimeStamp tsValue = new TimeStamp();
-	protected TimeStamp tsGossipped = new TimeStamp();
+	protected TimeStamp tsReplica = new TimeStamp();
 	protected Threads threads = new Threads();
 	
 	protected Request reqGossip, reqQuery, reqUpdate;
@@ -61,10 +62,18 @@ public class ReplicationManager extends Node {
 	private void checkNetwork() {
 		Status s;
 		s = reqGossip.Test(); 
-		if(s != null) {
-			log("NETWORK: got gossip msg");
-			Gossip g = rcvGossip[0];			
-			setWorkLog.addAll(g.getUpdates());
+		if(s != null) {		
+			Gossip g = rcvGossip[0];
+			int added = 0;
+			for(Update u : g.getUpdates()) {
+				if(!knownMessages.contains(u.getTimeStamp())) { //unknown update
+					setWorkLog.add(u);
+					knownMessages.add(u.getTimeStamp());
+					tsReplica = TimeStamp.max(tsReplica, u.getTimeStamp());
+					added++;
+				}				
+			}
+			log("NETWORK: got gossip msg, added " + added + " out of " + g.getUpdates().size() + " updates to work log");
 			initGossipRequest();
 		}
 		s = reqQuery.Test();
@@ -78,6 +87,13 @@ public class ReplicationManager extends Node {
 		if(s != null) {
 			log("NETWORK: got update msg");
 			Update u = rcvUpdate[0];
+			tsReplica.setComponent(rank, tsReplica.getComponent(rank) + 1);
+			
+			//give the update an unique identifier
+			TimeStamp ts = u.getTimeStamp();
+			ts.setComponent(rank,  tsReplica.getComponent(rank));
+			knownMessages.add(u.getTimeStamp());
+			
 			setWorkLog.add(u);
 			initUpdateRequest();
 		}
@@ -85,12 +101,13 @@ public class ReplicationManager extends Node {
 
 	private void processUpdates() {
 		for(AtomicProtocolMessage msg : setWorkLog) {
-			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) > 0) { //newer update				
+			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) >= 0) { //newer update				
 				Update u = (Update)msg;				
 				log ("processing " + u);
 				
 				try {
 					threads.addMessage(u.getMessage());
+					log("APP: added message from " + u);
 				} catch (Exception e) {
 					log("Could not add message " + u.getMessage().getId());
 					e.printStackTrace();
@@ -108,16 +125,16 @@ public class ReplicationManager extends Node {
 	private void answerQueries() {
 		Set<Query> done = new TreeSet<Query>();
 		for(AtomicProtocolMessage msg : setWorkLog) {
-			if(msg instanceof Query && msg.getTimeStamp().compareTo(tsValue) < 0) { //solvable query
+			if(msg instanceof Query && msg.getTimeStamp().compareTo(tsValue) <= 0) { //solvable query
 				Query q = (Query)msg;
-				
-				log("answering " + q);
-				
+							
 				QueryResponse r = new QueryResponse(tsValue);
 				Thread result = threads.findMessage(q.getMessage());
 				
 				if(result != null)				
 					r.setMessageAndAnswers(result.getMessage(), result.getAnswers());
+				
+				log("answering " + q);
 				
 				QueryResponse sndBuf[] = new QueryResponse[1];
 				sndBuf[0] = r;
@@ -133,30 +150,29 @@ public class ReplicationManager extends Node {
 	
 	private void gossip() {
 		List<Update> updates = new Vector<Update>();
-		TimeStamp t = new TimeStamp(tsGossipped);
 		
-		//find all ungossipped updates...
+		//find all updates...
 		for(AtomicProtocolMessage msg : setWorkLog) {
-			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsGossipped) < 0) { //ungossipped update
-				t = TimeStamp.max(t, msg.getTimeStamp());
+			if(msg instanceof Update) { 
 				updates.add((Update)msg);
 			}
 		}
+		
+		if(updates.isEmpty())
+			return;
 		
 		//...and prepare a gossip message including them
 		Gossip gossipMessage = new Gossip(updates);
 		
 		for(int rank : replicationManagerIds) {
+			log("NETWORK: gossipping to " + rank);
 			Gossip sndBuf[] = new Gossip[1];
 			sndBuf[0] = gossipMessage;
 			MPI.COMM_WORLD.Isend(sndBuf, 0, 1, MPI.OBJECT, rank, ProtocolMessage.GOSSIP);
 		}
-		
-		//the updates are done and gossipped, so remove them
-		setWorkLog.removeAll(updates);
 	}
 	
 	protected void log(String msg) {
-		super.log(msg + " (my tsValue: " + tsValue + " my tsGossipped: " + tsGossipped + ")");
+		super.log(msg + " (my tsValue: " + tsValue + " my tsReplica: " + tsReplica + " worklog size: " + setWorkLog.size() + ")");
 	}
 }
