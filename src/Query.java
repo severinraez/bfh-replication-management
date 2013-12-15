@@ -23,4 +23,8 @@ public class Query extends AtomicProtocolMessage {
 	public void setMessage(int iMessage) {
 		this.iMessage = iMessage;
 	}
+	
+	public String toString() {
+		return "query @" + tsTime + " msg " + iMessage + ", sender " + iSender;
+	}
 }

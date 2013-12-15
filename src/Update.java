@@ -11,4 +11,8 @@ public class Update extends AtomicProtocolMessage {
 	public Message getMessage() {
 		return msgData;
 	}
+	
+	public String toString() {
+		return "update @" + tsTime + ", msg " + msgData.getId(); 
+	}
 }

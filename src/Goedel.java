@@ -34,7 +34,6 @@ public class Goedel {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("start");
 		int rank, size;
 		MPI.Init(args);
 		
@@ -42,7 +41,6 @@ public class Goedel {
 		rank = MPI.COMM_WORLD.Rank();
 		
 		if(size == neighbours.length) {
-			System.out.println("init");
 			Node n = null;
 			if(rank < frontendsFrom)
 				n = new ReplicationManager(rank, neighbours[rank][0], neighbours[rank][1]);

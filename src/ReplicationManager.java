@@ -23,7 +23,6 @@ public class ReplicationManager extends Node {
 
 	public ReplicationManager(int rank, int frontEndIds[] , int replicationManagerIds[]) {
 		super(rank, "RM", frontEndIds, replicationManagerIds);
-		log("initialized");
 	}
 
 	public void work() {
@@ -63,18 +62,21 @@ public class ReplicationManager extends Node {
 		Status s;
 		s = reqGossip.Test(); 
 		if(s != null) {
+			log("NETWORK: got gossip msg");
 			Gossip g = rcvGossip[0];			
 			setWorkLog.addAll(g.getUpdates());
 			initGossipRequest();
 		}
 		s = reqQuery.Test();
 		if(s != null) {
+			log("NETWORK: got query msg");
 			Query q = rcvQuery[0];			
 			setWorkLog.add(q);
 			initQueryRequest();
 		}
 		s = reqUpdate.Test();
 		if(s != null) {
+			log("NETWORK: got update msg");
 			Update u = rcvUpdate[0];
 			setWorkLog.add(u);
 			initUpdateRequest();
@@ -83,8 +85,9 @@ public class ReplicationManager extends Node {
 
 	private void processUpdates() {
 		for(AtomicProtocolMessage msg : setWorkLog) {
-			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) > 0) { //newer update
+			if(msg instanceof Update && msg.getTimeStamp().compareTo(tsValue) > 0) { //newer update				
 				Update u = (Update)msg;				
+				log ("processing update " + u);
 				
 				try {
 					threads.addMessage(u.getMessage());

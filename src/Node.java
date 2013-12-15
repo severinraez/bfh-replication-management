@@ -10,6 +10,17 @@ public abstract class Node {
 		strType = type;
 		this.frontEndIds = frontEndIds;
 		this.replicationManagerIds = replicationManagerIds;
+	
+		String msg = "node initialized, fe neighbours: ";
+		for(int id : frontEndIds) {
+			msg += id + ", ";
+		}
+		msg += "rm neighbours: ";
+		for(int id : replicationManagerIds) {
+			msg += id + ", ";
+		}
+		msg += ", go.";
+		log(msg);
 	}
 
 	protected void log(String msg) {

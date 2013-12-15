@@ -14,7 +14,6 @@ public class FrontEnd extends Node {
 
 	public FrontEnd(int rank, int[] frontEndIds, int[] replicationManagerIds) {
 		super(rank, "FE", frontEndIds, replicationManagerIds);
-		log("initialized");
 		iKnownMessages.add(0);
 	}
 
@@ -33,7 +32,7 @@ public class FrontEnd extends Node {
 	protected void query() {
 		if(Math.random() > 0.25)
 			return;
-			
+					
 		Query sndBuf[] = new Query[1];
 			
 		Query q = new Query(ts);
@@ -43,6 +42,7 @@ public class FrontEnd extends Node {
 		sndBuf[0] = q;
 			
 		int who = randomNeighbour();
+		log("NETWORK: Querying " + who + ": " + q);
 		MPI.COMM_WORLD.Send(sndBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY);
 		MPI.COMM_WORLD.Recv(queryRcvBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.QUERY_RESPONSE);		
 		QueryResponse r = queryRcvBuf[0];
@@ -51,7 +51,7 @@ public class FrontEnd extends Node {
 		for(Message msg : r.getAnswers()) {
 			iKnownMessages.add(msg.getId());			
 		}
-		logResponse(r);
+		log("NETWORK: Received" + r);
 	}
 	
 	protected void sendMessage() {
@@ -60,13 +60,12 @@ public class FrontEnd extends Node {
 		
 		Message m = new Message(++iIdCounter, rank, randomMessage(), "Hello from FE " + rank);
 		Update u = new Update(ts, m);
-		
-		logUpdate(u);
-		
+			
 		Update sndBuf[] = new Update[1];
 		sndBuf[0] = u;		
 		
 		int who = randomNeighbour();
+		log("NETWORK: Sending " + u + " to " + who);
 		MPI.COMM_WORLD.Send(sndBuf, 0, 1, MPI.OBJECT, who, ProtocolMessage.UPDATE);
 	}
 	
@@ -81,20 +80,7 @@ public class FrontEnd extends Node {
 	}
 	
 	protected int randomNeighbour() {
-		int index = (int)(Math.round(Math.random() * frontEndIds.length-1));
-		return frontEndIds[index];
-	}
-	
-	protected void logUpdate(Update u) {
-		String str = "";
-		str += "Sending update with ts " + u.getTimeStamp() + " and message " + u.getMessage().getId();
-		System.out.println(str);
-	}
-	
-	protected void logResponse(QueryResponse r) {
-		String str = "";
-		str += "Received QueryResponse with ts " + r.getTimeStamp() + " and " + r.getAnswers().size() + " answers";
-		System.out.println(str);
-
+		int index = (int)(Math.round(Math.random() * (replicationManagerIds.length-1)));
+		return replicationManagerIds[index];
 	}
 }

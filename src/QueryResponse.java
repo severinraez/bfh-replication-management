@@ -22,4 +22,8 @@ public class QueryResponse extends AtomicProtocolMessage {
 		this.msg = msg;
 		this.answers = answers;
 	}
+	
+	public String toString() {
+		return "QueryResponse @" + tsTime + " with " + answers.size() + " answers";		
+	}
 }
