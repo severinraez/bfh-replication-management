@@ -16,6 +16,7 @@ public class ReplicationManager extends Node {
 	protected SortedMap<TimeStamp, Update> mapWorkLog = new TreeMap<TimeStamp, Update>();
 	protected List<Query> listQueries = new LinkedList<Query>();
 	protected Set<TimeStamp> doneUpdates = new TreeSet<TimeStamp>();
+	//ATTENTION: (0) - TS blocks everything!
 	protected Set<TimeStamp> knownMessages = new TreeSet<TimeStamp>();
 	protected TimeStamp tsValue = new TimeStamp();
 	protected TimeStamp tsReplica = new TimeStamp();
@@ -75,11 +76,13 @@ public class ReplicationManager extends Node {
 		if (s != null) {
 			Gossip g = rcvGossip[0];
 			int added = 0;
-			for (Update u : g.getUpdates()) {
-				if (!knownMessages.contains(u.getTimeStamp())) { // unknown
+			for (Map.Entry<TimeStamp, Update> e : g.getUpdates().entrySet()) {
+				Update u = e.getValue();
+				TimeStamp ts = e.getKey();
+				if (!knownMessages.contains(ts)) { // unknown
 																	// update
-					mapWorkLog.put(u.getTimeStamp(), u);
-					knownMessages.add(u.getTimeStamp());
+					mapWorkLog.put(ts, u);
+					knownMessages.add(ts);
 					added++;
 				}
 			}
@@ -104,7 +107,7 @@ public class ReplicationManager extends Node {
 			// give the update an unique identifier
 			TimeStamp ts = new TimeStamp(u.getTimeStamp());
 			ts.setComponent(rank, tsReplica.getComponent(rank));
-			knownMessages.add(u.getTimeStamp());
+			knownMessages.add(ts);
 
 			mapWorkLog.put(ts, u);
 			initUpdateRequest();
@@ -114,10 +117,11 @@ public class ReplicationManager extends Node {
 	private void processUpdates() {
 		for (Map.Entry<TimeStamp, Update> entry : mapWorkLog.entrySet()) {
 			Update u = entry.getValue();
+			TimeStamp ts = entry.getKey();
 			//log("worklog: " + mapWorkLog.toString());
 			//log("doneupdates: " + doneUpdates.toString());
-			if (doneUpdates.contains(u.getTimeStamp())) // don't apply updates
-														// twice
+			if (doneUpdates.contains(ts)) // don't apply updates
+										  // twice
 				continue;
 
 			if (u.getTimeStamp().compareTo(tsValue) <= 0) {
@@ -134,10 +138,10 @@ public class ReplicationManager extends Node {
 					e.printStackTrace();
 				}
 
-				doneUpdates.add(u.getTimeStamp());
+				doneUpdates.add(ts);
 
 				// adjust our value timestamp to reflect added updates
-				TimeStamp t = TimeStamp.max(tsValue, u.getTimeStamp());
+				TimeStamp t = TimeStamp.max(tsValue, ts);
 				tsValue = t;
 			}
 		}
@@ -172,19 +176,11 @@ public class ReplicationManager extends Node {
 	}
 
 	private void gossip() {
-		List<Update> updates = new Vector<Update>();
-
-		// find all updates...
-		for (Map.Entry<TimeStamp, Update> entry : mapWorkLog.entrySet()) {
-			Update u = entry.getValue();
-    		updates.add(u);
-		}
-
-		if (updates.isEmpty())
+		if (mapWorkLog.isEmpty())
 			return;
 
 		// ...and prepare a gossip message including them
-		Gossip gossipMessage = new Gossip(updates, tsReplica);
+		Gossip gossipMessage = new Gossip(mapWorkLog, tsReplica);
 
 		for (int rank : replicationManagerIds) {
 			// log("NETWORK: gossipping to " + rank);

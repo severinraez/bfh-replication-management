@@ -1,17 +1,17 @@
-import java.util.List;
-import java.util.Vector;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Gossip extends ProtocolMessage {
 	private static final long serialVersionUID = 963051547778207777L;
-	protected List<Update> lstUpdates = new Vector<Update>();
+	protected Map<TimeStamp, Update> lstUpdates = new TreeMap<TimeStamp, Update>();
 	protected TimeStamp ts;
 	
-	public Gossip(List<Update> updates, TimeStamp ts) {
+	public Gossip(Map<TimeStamp, Update> updates, TimeStamp ts) {
 		lstUpdates = updates;
 		this.ts = ts;
 	}
 	
-	public List<Update> getUpdates() {
+	public Map<TimeStamp, Update> getUpdates() {
 		return lstUpdates;
 	}
 	
