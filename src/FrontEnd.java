@@ -66,8 +66,9 @@ public class FrontEnd extends Node {
 		if (Math.random() > 0.25)
 			return;
 
-		Message m = new Message(++iIdCounter, rank, randomMessage(),
-				"Hello #" + iIdCounter + " from FE " + rank, ts);
+		int answerToId = randomMessage(); 		
+		Message m = new Message(++iIdCounter, rank, answerToId,
+				"Hello #" + iIdCounter + " from FE " + rank + ", an answer to " + answerToId, ts);
 		Update u = new Update(ts, m);
 
 		Update sndBuf[] = new Update[1];
