@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -7,6 +8,7 @@ public class FrontEnd extends Node {
 	protected Set<Integer> iKnownMessages = new TreeSet<Integer>();
 
 	protected TimeStamp ts = new TimeStamp();
+	protected Random rand = new Random();
 
 	protected QueryResponse queryRcvBuf[] = new QueryResponse[1];
 	protected boolean bWaitingForResponse = false;
@@ -52,10 +54,10 @@ public class FrontEnd extends Node {
 
 		if (r.getMessage() != null) {
 			iKnownMessages.add(r.getMessage().getId());
-			if (r.getAnswers() != null) {
-				for (Message msg : r.getAnswers()) {
-					iKnownMessages.add(msg.getId());
-				}
+		}
+		if (r.getAnswers() != null) {
+			for (Message msg : r.getAnswers()) {
+				iKnownMessages.add(msg.getId());
 			}
 		}
 		
@@ -67,8 +69,9 @@ public class FrontEnd extends Node {
 			return;
 
 		int answerToId = randomMessage(); 		
-		Message m = new Message(++iIdCounter, rank, answerToId,
-				"Hello #" + iIdCounter + " from FE " + rank + ", an answer to " + answerToId, ts);
+		int id = ++iIdCounter + rank * 10000;
+		Message m = new Message(id, rank, answerToId,
+				"Hello #" + id + " from FE " + rank + ", an answer to " + answerToId, ts);
 		Update u = new Update(ts, m);
 
 		Update sndBuf[] = new Update[1];
@@ -81,8 +84,8 @@ public class FrontEnd extends Node {
 	}
 
 	protected int randomMessage() {
-		int index = (int) (Math.round(Math.random() * iKnownMessages.size()));
-		;
+		int index = rand.nextInt(iKnownMessages.size());
+		
 		int curIndex = 0;
 		for (int messageId : iKnownMessages) {
 			if (curIndex++ == index)
@@ -98,7 +101,7 @@ public class FrontEnd extends Node {
 	}
 
 	protected void log(String msg) {
-		super.log(msg + " (my ts: " + ts + ")");
+		super.log(msg + " (my ts: " + ts + ", I know " + iKnownMessages.size() + " messages)");
 	}
 
 }

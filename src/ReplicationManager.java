@@ -152,11 +152,16 @@ public class ReplicationManager extends Node {
 		for (Query q : listQueries) {
 			if (q.getTimeStamp().compareTo(tsValue) <= 0) { // solvable query
 				QueryResponse r = new QueryResponse(tsValue);
-				Thread result = threads.findMessage(q.getMessage());
+				if(q.getMessage() != 0) {
+					Thread result = threads.findMessage(q.getMessage());
 
-				if (result != null)
-					r.setMessageAndAnswers(result.getMessage(),
-							result.getAnswers());
+					if (result != null)
+						r.setMessageAndAnswers(result.getMessage(),
+								result.getAnswers());					
+				}
+				else { //query for all messages
+					r.setMessageAndAnswers(null, threads.getAllMessages());
+				}
 
 				log("answering " + q);
 

@@ -13,6 +13,10 @@ public class Update extends AtomicProtocolMessage {
 	}
 	
 	public String toString() {
-		return "update @" + tsTime + ", msg " + msgData.getId(); 
+		String desc = "update @" + tsTime + ", msg " + msgData.getId();
+		if(msgData.getAnswerToId() != 0) {
+			desc += " answer to " + msgData.getAnswerToId(); 
+		}
+		return desc;
 	}
 }

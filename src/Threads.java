@@ -29,6 +29,14 @@ public class Threads {
 		return null;
 	}
 	
+	public List<Message> getAllMessages() {
+		List<Message> list = new Vector<Message>();
+		for(Thread t : rootThreads) {
+			list.add(t.getMessage());
+		}
+		return list;
+	}
+	
 	public String toString() {
 		String str = "";
 		for(Thread t : rootThreads) {

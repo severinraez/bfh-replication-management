@@ -52,7 +52,7 @@ public class Thread {
 		}
 		str += msg + "\n";
 	    for(Thread t : children) {
-	    	t._toString(level + 4);
+	    	str += t._toString(level + 4);
 	    }
 	    return str;
 	}
